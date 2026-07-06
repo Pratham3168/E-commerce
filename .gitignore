@@ -1,0 +1,22 @@
+# Node modules
+**/node_modules
+
+# Environment variables
+**/.env
+
+# Build folders
+**/dist
+**/build
+
+# Logs
+*.log
+
+# Coverage
+coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode
