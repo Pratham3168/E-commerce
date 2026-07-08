@@ -23,6 +23,7 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
       unique: true,
+      required: true,
       trim: true,
       sparse: true,
     },
@@ -62,16 +63,15 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function () {
     //only hash the password if it has been modified (or is new)
     if(!this.isModified("password")){
-        return next();
+        return;
     }
 
     //hash the password
     this.password = await bcrypt.hash(this.password,10);
 
-    next();
 })
 
 const User = mongoose.model("User", userSchema);
