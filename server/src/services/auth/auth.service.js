@@ -5,10 +5,6 @@ import ApiError from '../../errors/apiError.js';
 export const registerUser = async (userData) => {
     const { firstName, lastName, email, password,phone } = userData;  
 
-    if(!firstName || !lastName || !email || !password || !phone){
-        throw new ApiError(400, "All fields are required");
-    }
-
     //check if user already exists
     const existingUser = await User.findOne({
         $or : [{ email }, { phone }] });
@@ -30,3 +26,28 @@ export const registerUser = async (userData) => {
     .select("-password -refreshToken");
     return createdUser;
 };
+
+
+export const loginUser = async (userData) => {
+    const {login,password} = userData;
+
+    const query = login.includes("@")
+        ? { email: login }
+        : { phone: login };
+
+    const user = await User.findOne(query);
+
+    if(!user){
+        throw new ApiError(401, "Invalid credentials");
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+
+    if(!isPasswordValid){
+        throw new ApiError(401, "Invalid credentials");
+    }
+
+    const safeUser = await User.findById(user._id).select("-password -refreshToken");
+
+    return safeUser;    
+}
