@@ -12,9 +12,25 @@ export const registerUser = asyncHandler( async (req,res) => {
 
 
 export const loginUser = asyncHandler( async (req,res) => {
-    const user = await authService.loginUser(req.body);
+    const {user, accessToken, refreshToken} = await authService.loginUser(req.body);
 
-    return res.status(200).json(
-        new ApiResponse(200,user,"User logged in successfully")
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production",
+        sameSite: "strict",
+    };
+
+    return res
+        .status(200)
+        .cookie("accessToken" , accessToken, cookieOptions)
+        .cookie("refreshToken" , refreshToken, cookieOptions)
+        .json(
+        new ApiResponse(200,
+            {
+                user,
+                accessToken,
+            },
+            "User logged in successfully"
+        )
     );
 });

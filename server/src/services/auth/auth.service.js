@@ -1,5 +1,31 @@
 import User from '../../models/user.model.js';
 import ApiError from '../../errors/apiError.js';
+import jwt from 'jsonwebtoken';
+
+
+//HELPER FUNCTION TO GENERATE ACCESS TOKEN
+const generateAccessToken = (user) => {
+    return jwt.sign(
+        {
+            _id: user._id,
+            role: user.role,
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    );
+};
+
+
+//helper function to generate refresh token
+const generateRefreshToken = (user) => {
+    return jwt.sign(
+        {
+            _id: user._id,
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    );
+}
 
 //IMPLEMENTATION OF REGISTER USER FUNCTION
 export const registerUser = async (userData) => {
@@ -47,7 +73,13 @@ export const loginUser = async (userData) => {
         throw new ApiError(401, "Invalid credentials");
     }
 
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
     const safeUser = await User.findById(user._id).select("-password -refreshToken");
 
-    return safeUser;    
+    return { user: safeUser, accessToken, refreshToken };    
 }
