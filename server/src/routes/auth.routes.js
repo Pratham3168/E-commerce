@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { registerUser } from '../controllers/auth/auth.controller.js';
+import { refreshAccessToken, registerUser } from '../controllers/auth/auth.controller.js';
 import { loginUser } from '../controllers/auth/auth.controller.js';
 
 //importing middlewares
@@ -11,6 +11,7 @@ const router = Router();
 
 router.post('/register', registerValidator, validationMiddleware, registerUser);
 router.post('/login', loginValidator, validationMiddleware, loginUser);
+router.post("/refresh-token", refreshAccessToken);
 
 
 export default router;

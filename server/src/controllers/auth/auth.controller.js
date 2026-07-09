@@ -34,3 +34,30 @@ export const loginUser = asyncHandler( async (req,res) => {
         )
     );
 });
+
+
+export const refreshAccessToken = asyncHandler(async (req,res) => {
+    const incomingRefreshToken = req.cookies.refreshToken;
+
+    const {accessToken, refreshToken} = 
+        await authService.refreshAccessToken(incomingRefreshToken);
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production",
+        sameSite: "strict",
+    };
+
+    return res
+        .status(200)
+        .cookie("accessToken" , accessToken, cookieOptions)
+        .cookie("refreshToken" , refreshToken, cookieOptions)
+        .json(
+        new ApiResponse(200,
+            {
+                accessToken,
+            },
+            "Access token refreshed successfully"
+        )
+    );
+})
