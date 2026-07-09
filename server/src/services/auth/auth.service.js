@@ -172,3 +172,19 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 
     await user.save();
 };
+
+export const deleteAccount = async(userId, password) => {
+    const user = await User.findById(userId);
+
+    if(!user){
+        throw new ApiError(404, "User not found");
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+
+    if(!isPasswordValid){
+        throw new ApiError(401, "Password is incorrect");
+    }
+
+    await User.findByIdAndDelete(userId);
+}

@@ -107,4 +107,26 @@ export const changePassword = asyncHandler(async (req, res) => {
                 "Password changed successfully. Please login again"
             )
         )
-})
+});
+
+export const deleteAccount = asyncHandler(async (req,res) => {
+    await authService.deleteAccount(req.user._id, req.body.password);
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production",
+        sameSite: "strict",
+    };
+
+    return res
+        .status(200)
+        .clearCookie("accessToken",cookieOptions)
+        .clearCookie("refreshToken",cookieOptions)
+        .json(
+            new ApiResponse(
+                200,
+                null,
+                "Account deleted successfully"
+            )
+        )
+});
