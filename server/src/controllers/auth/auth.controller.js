@@ -83,4 +83,28 @@ export const logoutUser = asyncHandler(async (req,res) => {
                 "Logged Out successfully"
             )
         )
+});
+
+
+export const changePassword = asyncHandler(async (req, res) => {
+    await authService.changePassword(req.user._id,req.body.currentPassword, req.body.newPassword);
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production",
+        sameSite: "strict",
+    };
+
+
+    return res
+        .status(200)
+        .clearCookie("accessToken",cookieOptions)
+        .clearCookie("refreshToken",cookieOptions)
+        .json(
+            new ApiResponse(
+                200,
+                null,
+                "Password changed successfully. Please login again"
+            )
+        )
 })
