@@ -56,3 +56,28 @@ export const updateCategoryController = asyncHandler(async (req,res) => {
         )
     );
 });
+
+
+export const deleteCategoryController = asyncHandler(async (req,res) => {
+    const category = await categoryService.deleteCategory(req.params.id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            category,
+            "Category deleted successfully"
+        )
+    );
+})
+
+export const restoreCategoryController = asyncHandler(async (req, res) => {
+    const category = await categoryService.restoreCategory(req.params.id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            category,
+            "Category restored successfully"
+        )
+    );
+});

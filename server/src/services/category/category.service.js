@@ -3,90 +3,125 @@ import Category from "../../models/category.model.js";
 import ApiError from "../../errors/apiError.js";
 
 export const createCategory = async (categoryData) => {
+  const { name, description } = categoryData;
 
-    const {name,description} = categoryData;
+  const slug = slugify(name, {
+    lower: true,
+    strict: true,
+  });
 
-    const slug = slugify(name, {
-        lower: true,
-        strict: true,
-    })
+  const existingCategory = await Category.findOne({ slug });
 
-    const ifCategoryExists = await Category.findOne({slug});
-
-    if(ifCategoryExists){
-        throw new ApiError(409, "Category already exists");
+  if (existingCategory) {
+    if (existingCategory.isActive) {
+      throw new ApiError(409, "Category already exists");
     }
 
-    const newCategory = new Category({
-        name,
-        description
-    });
+    throw new ApiError(
+      409,
+      "Category already exists but is inactive. Restore it instead.",
+    );
+  }
 
-    await newCategory.save();
+  const newCategory = new Category({
+    name,
+    description,
+  });
 
-    return newCategory;
+  await newCategory.save();
+
+  return newCategory;
 };
-
 
 export const getAllCategories = async () => {
-    const categories = await Category.find({isActive: true})
-                                    .select("name description slug image")
-                                    .sort({name: 1})
+  const categories = await Category.find({ isActive: true })
+    .select("name description slug image")
+    .sort({ name: 1 });
 
-    return categories;
-}
-
+  return categories;
+};
 
 export const getCategoryBySlug = async (slug) => {
-    const category = await Category.findOne({slug, isActive: true});
+  const category = await Category.findOne({ slug, isActive: true });
 
-    if(!category){
-        throw new ApiError(404, "Category not found");
+  if (!category) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  return category;
+};
+
+export const updateCategory = async (categoryId, categoryData) => {
+  const { name, description } = categoryData;
+
+  const category = await Category.findById(categoryId);
+
+  if (!category) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  if (name === undefined && description === undefined) {
+    throw new ApiError(400, "Please provide at least one field to update");
+  }
+
+  if (name !== undefined && name !== category.name) {
+    const slug = slugify(name, {
+      lower: true,
+      strict: true,
+    });
+
+    const existingCategory = await Category.findOne({ slug });
+
+    if (
+      existingCategory &&
+      existingCategory._id.toString() !== category._id.toString()
+    ) {
+      throw new ApiError(409, "Category already exists");
     }
 
-    return category;
+    category.name = name;
+  }
+  if (description !== undefined && description !== category.description) {
+    category.description = description;
+  }
+
+  await category.save();
+
+  return category;
+};
+
+export const deleteCategory = async (categoryId) => {
+  const category = await Category.findById(categoryId);
+
+  if (!category) {
+    throw new ApiError(404, "Category not found");
+  }
+
+  if (!category.isActive) {
+    throw new ApiError(400, "Category is already inactive");
+  }
+
+  category.isActive = false;
+  await category.save();
+
+  return category;
 };
 
 
-
-export const updateCategory = async (categoryId, categoryData) => {
-    const {name , description} = categoryData;
-
+export const restoreCategory = async (categoryId) => {
     const category = await Category.findById(categoryId);
 
-    if(!category){
+    if (!category) {
         throw new ApiError(404, "Category not found");
     }
 
-    if (name === undefined && description === undefined) {
-        throw new ApiError(
-            400,
-            "Please provide at least one field to update"
-        );
+    if (category.isActive) {
+        throw new ApiError(400, "Category is already active");
     }
 
-    if(name !== undefined && name !== category.name){
-        const slug = slugify(name, {
-            lower: true,
-            strict: true,
-        });
-
-        const existingCategory = await Category.findOne({ slug });
-
-        if (
-            existingCategory &&
-            existingCategory._id.toString() !== category._id.toString()
-        ) {
-            throw new ApiError(409, "Category already exists");
-        }
-
-        category.name = name;
-    }
-    if(description !== undefined && description !== category.description){
-        category.description = description;
-    }
+    category.isActive = true;
 
     await category.save();
 
     return category;
-}
+};

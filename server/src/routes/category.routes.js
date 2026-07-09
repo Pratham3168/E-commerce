@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 //controllers
-import { createCategoryController,getAllCategoriesController, getCategoryBySlugController, updateCategoryController } from '../controllers/category/category.controller.js';
+import { createCategoryController,getAllCategoriesController, getCategoryBySlugController, updateCategoryController,deleteCategoryController, restoreCategoryController } from '../controllers/category/category.controller.js';
 
 //validators
 import { createCategoryValidator } from '../validators/category/createCategory.validator.js';
@@ -30,5 +30,14 @@ router
 router.get("/:slug", getCategoryBySlugController);
 
 router.patch("/:id",protect,authorize("admin") ,updateCategoryValidator,validationMiddleware, updateCategoryController);
+    
+router.delete("/:id", protect, authorize("admin"), deleteCategoryController);
+
+router.patch(
+    "/:id/restore",
+    protect,
+    authorize("admin"),
+    restoreCategoryController
+);
 
 export default router;
