@@ -135,3 +135,16 @@ export const refreshAccessToken = async (incomingRefreshToken) => {
     return { accessToken, refreshToken };
 
 };
+
+
+
+export const logoutUser = async (userId) => {
+    await User.findByIdAndUpdate(
+        userId,
+        {
+            $unset: {
+                refreshToken: 1,
+            },
+        }
+    );
+};

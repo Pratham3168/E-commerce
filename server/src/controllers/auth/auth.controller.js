@@ -61,3 +61,26 @@ export const refreshAccessToken = asyncHandler(async (req,res) => {
         )
     );
 })
+
+
+export const logoutUser = asyncHandler(async (req,res) => {
+    await authService.logoutUser(req.user._id);
+
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV == "production",
+        sameSite: "strict",
+    };
+
+    return res
+        .clearCookie("accessToken",cookieOptions)
+        .clearCookie("refreshToken",cookieOptions)
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                null,
+                "Logged Out successfully"
+            )
+        )
+})
