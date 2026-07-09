@@ -27,3 +27,32 @@ export const getAllCategoriesController = asyncHandler(async (req,res) => {
     )
 
 });
+
+
+export const getCategoryBySlugController = asyncHandler(async (req,res) => {
+
+    const category = await categoryService.getCategoryBySlug(req.params.slug);
+
+    return res.status(200).json(
+    new ApiResponse(
+            200,
+            category,
+            "Category fetched successfully"
+        )
+    );
+
+
+});
+
+
+export const updateCategoryController = asyncHandler(async (req,res) => {
+    const category = await categoryService.updateCategory(req.params.id, req.body);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            category,
+            "Category updated successfully"
+        )
+    );
+});
