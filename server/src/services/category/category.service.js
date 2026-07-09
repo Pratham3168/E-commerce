@@ -25,4 +25,13 @@ export const createCategory = async (categoryData) => {
     await newCategory.save();
 
     return newCategory;
+};
+
+
+export const getAllCategories = async () => {
+    const categories = await Category.find({isActive: true})
+                                    .select("name description slug image")
+                                    .sort({name: 1})
+
+    return categories;
 }

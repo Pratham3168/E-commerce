@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 //controllers
-import { createCategoryController } from '../controllers/category/category.controller.js';
+import { createCategoryController,getAllCategoriesController } from '../controllers/category/category.controller.js';
 
 //validators
 import { createCategoryValidator } from '../validators/category/createCategory.validator.js';
@@ -14,13 +14,16 @@ import protect from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.post(
-    "/",
-    protect,
-    authorize("admin"),
-    createCategoryValidator,
-    validationMiddleware,
-    createCategoryController
-);
+
+router
+    .route("/")
+    .get(getAllCategoriesController)
+    .post(
+        protect,
+        authorize("admin"),
+        createCategoryValidator,
+        validationMiddleware,
+        createCategoryController
+    );
 
 export default router;
