@@ -50,18 +50,55 @@ export const createProduct = async (productData) => {
   return product;
 };
 
+export const getAllProducts = async (query) => {
+  const { page, limit, search, category, brand, minPrice, maxPrice } = query;
+  const skip = (page - 1) * limit;
+  const filter = { isActive: true };
 
-export const getAllProducts = async(query) => {
+  let categoryDoc;
+  if (category) {
+    categoryDoc = await Category.findOne({
+      slug: category,
+      isActive: true,
+    });
 
-  const { page , limit, search} = query;
-  const skip = (page-1)*limit;
-  const filter = { isActive: true};
+    if (!categoryDoc) {
+      throw new ApiError(404, "Category not found");
+    }
 
-  if(search){
+    filter.category = categoryDoc._id;
+  }
+
+  if (search) {
     filter.name = {
       $regex: search,
-      $options: "i"
-    }
+      $options: "i",
+    };
+  }
+
+  if (brand) {
+    filter.brand = {
+      $regex: `^${brand}$`,
+      $options: "i",
+    };
+  }
+
+  if (minPrice || maxPrice) {
+    filter.price = {};
+  }
+
+  if (minPrice && maxPrice && Number(minPrice) > Number(maxPrice)) {
+    throw new ApiError(
+      400,
+      "Minimum price cannot be greater than maximum price",
+    );
+  }
+
+  if (minPrice) {
+    filter.price.$gte = Number(minPrice);
+  }
+  if (maxPrice) {
+    filter.price.$lte = Number(maxPrice);
   }
 
   const products = await Product.find(filter)
@@ -83,7 +120,7 @@ export const getAllProducts = async(query) => {
       totalProducts,
       totalPages,
       hasNextPage,
-      hasPrevPage
-    }
+      hasPrevPage,
+    },
   };
 };

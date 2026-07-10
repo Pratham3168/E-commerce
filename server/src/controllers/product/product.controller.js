@@ -21,6 +21,10 @@ export const getAllProductsController = asyncHandler(async (req,res) => {
     page: Number(req.query.page) || 1,
     limit: Number(req.query.limit) || 10,
     search: req.query.search || "",
+    category: req.query.category || "",
+    brand: req.query.brand || "",
+    minPrice: req.query.minPrice,
+    maxPrice: req.query.maxPrice,
 };
 
   const products = await productService.getAllProducts(query);
