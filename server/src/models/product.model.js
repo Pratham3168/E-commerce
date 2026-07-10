@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
         unique: true,
         lowercase: true
     },
-    category:{
+    categoryId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
         required: true
@@ -88,19 +88,15 @@ const productSchema = new mongoose.Schema({
 }, {timestamps: true});
 
 
-productSchema.pre("save", function(next) {
-
-    if (!this.isModified("name")) {
-        return next();
-    }
+productSchema.pre("save", function () {
+    if (!this.isModified("name")) return;
 
     this.slug = slugify(this.name, {
         lower: true,
-        strict: true
+        strict: true,
     });
-
-    next();
 });
+
 
 const Product = mongoose.model("Product", productSchema);
 
