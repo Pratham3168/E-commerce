@@ -51,8 +51,15 @@ export const createProduct = async (productData) => {
 };
 
 
-export const getAllProducts = async() => {
-  const products = await Product.find({ isActive: true }).populate("category", "name slug").sort({createdAt: -1});
+export const getAllProducts = async(page, limit) => {
+
+  const skip = (page-1)*limit;
+
+  const products = await Product.find({isActive: true})
+    .populate("category", "name slug")
+    .sort({ createdAt: -1 })
+    .skip(skip)
+    .limit(limit);
 
   return products;
 };
