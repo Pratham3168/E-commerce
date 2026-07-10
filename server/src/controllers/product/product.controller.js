@@ -57,3 +57,29 @@ export const updateProductController = asyncHandler(async (req, res) => {
     new ApiResponse(200, updatedProduct, "Product updated successfully")
   );
 });
+
+export const deleteProductController = asyncHandler(async (req, res) => {
+
+    const product = await productService.deleteProduct(req.params.id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            product,
+            "Product deleted successfully"
+        )
+    );
+});
+
+export const restoreProductController = asyncHandler(async (req, res) => {
+    const product = await productService.restoreProduct(req.params.id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            product,
+            "Product restored successfully"
+        )
+    );
+
+  });
