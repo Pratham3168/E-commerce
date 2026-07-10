@@ -177,4 +177,65 @@ const product = await Product.findOne({
   }
 
   return product;
+};
+
+
+export const updateProduct = async (productId, updateData) => {
+
+  if (Object.keys(updateData).length === 0) {
+    throw new ApiError(400, "No fields provided for update");
+}
+  const product = await Product.findById(productId);
+
+  if(!product){
+    throw new ApiError(404, "Product not found");
+  }
+
+  if(updateData.name && updateData.name !== product.name){
+    const slug = slugify(updateData.name, {lower: true, strict: true});
+    
+    const existingProduct = await Product.findOne({slug});
+    if(existingProduct && existingProduct._id.toString() !== productId.toString()){
+      throw new ApiError(409, "Product with this name already exists, choose a different name");
+    }
+
+    product.name = updateData.name;
+  }
+
+  if(updateData.category && updateData.category !== product.category.toString()){
+    const categoryDoc = await Category.findById(updateData.category);
+
+    if(!categoryDoc){
+      throw new ApiError(404, "Category not found");
+    }
+
+    if(!categoryDoc.isActive){
+      throw new ApiError(400, "Cannot assign product to an inactive category");
+    }
+
+    product.category = updateData.category;
+  }
+
+  if(updateData.description !== undefined){
+    product.description = updateData.description;
+  }
+  if(updateData.brand !== undefined){
+    product.brand = updateData.brand;
+  }
+  if(updateData.price !== undefined){
+    product.price = updateData.price;
+  }
+  if(updateData.discountPercentage !== undefined){
+    product.discountPercentage = updateData.discountPercentage;
+  }
+  if(updateData.stock !== undefined){
+    product.stock = updateData.stock;
+  }
+  if(updateData.isFeatured !== undefined){
+    product.isFeatured = updateData.isFeatured;
+  }
+
+  await product.save();
+  await product.populate("category" , "name slug")
+  return product;
 }

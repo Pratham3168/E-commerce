@@ -6,7 +6,7 @@ import authorize from '../middlewares/authorize.middleware.js';
 import  validationMiddleware  from '../middlewares/validation.middleware.js';
 
 //controllers
-import { createProductController,getAllProductsController,getAllProductsBySlugController } from '../controllers/product/product.controller.js';
+import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController } from '../controllers/product/product.controller.js';
 //validators
 import { createProductValidator } from '../validators/product/createproduct.validator.js';
 
@@ -24,5 +24,9 @@ router
     );
 
 
+
+
 router.get("/:slug", getAllProductsBySlugController);
+
+router.patch("/:id", protect, authorize("admin"), updateProductController);
 export default router;

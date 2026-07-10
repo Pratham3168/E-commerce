@@ -47,3 +47,13 @@ export const getAllProductsBySlugController = asyncHandler(async (req,res) => {
     new ApiResponse(200, product, "Product fetched successfully")
   );
 });
+
+export const updateProductController = asyncHandler(async (req, res) => {
+  const productId = req.params.id;
+  const updateData = req.body;
+  const updatedProduct = await productService.updateProduct(productId, updateData);
+
+  return res.status(200).json(
+    new ApiResponse(200, updatedProduct, "Product updated successfully")
+  );
+});
