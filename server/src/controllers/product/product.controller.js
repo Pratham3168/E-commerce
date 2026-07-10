@@ -17,10 +17,13 @@ export const createProductController = asyncHandler(async (req, res) => {
 
 export const getAllProductsController = asyncHandler(async (req,res) => {
 
-  const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
+  const query = {
+    page: Number(req.query.page) || 1,
+    limit: Number(req.query.limit) || 10,
+    search: req.query.search || "",
+};
 
-  const products = await productService.getAllProducts(page,limit);
+  const products = await productService.getAllProducts(query);
 
   return res.status(200).json(
     new ApiResponse(200, products, "Products fetched successfully")

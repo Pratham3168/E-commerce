@@ -51,15 +51,39 @@ export const createProduct = async (productData) => {
 };
 
 
-export const getAllProducts = async(page, limit) => {
+export const getAllProducts = async(query) => {
 
+  const { page , limit, search} = query;
   const skip = (page-1)*limit;
+  const filter = { isActive: true};
 
-  const products = await Product.find({isActive: true})
+  if(search){
+    filter.name = {
+      $regex: search,
+      $options: "i"
+    }
+  }
+
+  const products = await Product.find(filter)
     .populate("category", "name slug")
     .sort({ createdAt: -1 })
     .skip(skip)
     .limit(limit);
 
-  return products;
+  const totalProducts = await Product.countDocuments(filter);
+  const totalPages = Math.ceil(totalProducts / limit);
+  const hasNextPage = page * limit < totalProducts;
+  const hasPrevPage = page > 1;
+
+  return {
+    products,
+    pagination: {
+      page,
+      limit,
+      totalProducts,
+      totalPages,
+      hasNextPage,
+      hasPrevPage
+    }
+  };
 };
