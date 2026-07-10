@@ -7,20 +7,20 @@ export const createProduct = async (productData) => {
   const {
     name,
     description,
-    categoryId,
+    category,
     brand,
     price,
     discountPercentage,
     stock,
     isFeatured,
   } = productData;
-  const category = await Category.findById(categoryId);
+  const categoryDoc = await Category.findById(category);
 
-  if (!category) {
+  if (!categoryDoc) {
     throw new ApiError(404, "Category not found");
   }
 
-  if (!category.isActive) {
+  if (!categoryDoc.isActive) {
     throw new ApiError(400, "Cannot create product in an inactive category");
   }
 
@@ -36,7 +36,7 @@ export const createProduct = async (productData) => {
   const product = new Product({
     name,
     description,
-    categoryId,
+    category,
     brand,
     price,
     discountPercentage,
@@ -48,4 +48,11 @@ export const createProduct = async (productData) => {
   await product.save();
 
   return product;
+};
+
+
+export const getAllProducts = async() => {
+  const products = await Product.find({ isActive: true }).populate("category", "name slug").sort({createdAt: -1});
+
+  return products;
 };

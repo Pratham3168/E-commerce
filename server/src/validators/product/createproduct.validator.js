@@ -11,7 +11,7 @@ export const createProductValidator = [
         .withMessage("Product description is required")
         .trim(),
     
-    body("categoryId")
+    body("category")
         .notEmpty()
         .withMessage("Product category is required")
         .isMongoId()

@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema({
         unique: true,
         lowercase: true
     },
-    categoryId:{
+    category:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Category",
         required: true

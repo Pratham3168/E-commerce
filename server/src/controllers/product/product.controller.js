@@ -13,3 +13,12 @@ export const createProductController = asyncHandler(async (req, res) => {
     "Product created successfully"
 ));
 });
+
+
+export const getAllProductsController = asyncHandler(async (req,res) => {
+  const products = await productService.getAllProducts();
+
+  return res.status(200).json(
+    new ApiResponse(200, products, "Products fetched successfully")
+  );
+});
