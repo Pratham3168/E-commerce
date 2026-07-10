@@ -25,11 +25,25 @@ export const getAllProductsController = asyncHandler(async (req,res) => {
     brand: req.query.brand || "",
     minPrice: req.query.minPrice,
     maxPrice: req.query.maxPrice,
+    sort: req.query.sort || "createdAt",
+    order: req.query.order || "desc",
+    featured: req.query.featured || false,
 };
 
   const products = await productService.getAllProducts(query);
 
   return res.status(200).json(
     new ApiResponse(200, products, "Products fetched successfully")
+  );
+});
+
+
+export const getAllProductsBySlugController = asyncHandler(async (req,res) => {
+  const slug = req.params.slug;
+
+  const product = await productService.getAllProductsBySlug(slug);
+
+  return res.status(200).json(
+    new ApiResponse(200, product, "Product fetched successfully")
   );
 });

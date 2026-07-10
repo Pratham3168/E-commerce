@@ -51,13 +51,37 @@ export const createProduct = async (productData) => {
 };
 
 export const getAllProducts = async (query) => {
-  const { page, limit, search, category, brand, minPrice, maxPrice } = query;
+  const {
+    page,
+    limit,
+    search,
+    category,
+    brand,
+    minPrice,
+    maxPrice,
+    sort,
+    order,
+    featured,
+  } = query;
   const skip = (page - 1) * limit;
   const filter = { isActive: true };
 
-  let categoryDoc;
+  const allowedSortFields = {
+    price: "price",
+    name: "name",
+    createdAt: "createdAt",
+    averageRating: "averageRating",
+    soldCount: "soldCount",
+  };
+
+  const sortField = allowedSortFields[sort] || "createdAt";
+  const sortOrder = order === "asc" ? 1 : -1;
+  const sortOption = {
+    [sortField]: sortOrder,
+  };
+
   if (category) {
-    categoryDoc = await Category.findOne({
+    const categoryDoc = await Category.findOne({
       slug: category,
       isActive: true,
     });
@@ -70,10 +94,20 @@ export const getAllProducts = async (query) => {
   }
 
   if (search) {
-    filter.name = {
-      $regex: search,
-      $options: "i",
-    };
+    filter.$or = [
+      {
+        name: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+      {
+        brand: {
+          $regex: search,
+          $options: "i",
+        },
+      },
+    ];
   }
 
   if (brand) {
@@ -101,9 +135,13 @@ export const getAllProducts = async (query) => {
     filter.price.$lte = Number(maxPrice);
   }
 
+  if (featured) {
+    filter.isFeatured = featured === "true";
+  }
+
   const products = await Product.find(filter)
     .populate("category", "name slug")
-    .sort({ createdAt: -1 })
+    .sort(sortOption)
     .skip(skip)
     .limit(limit);
 
@@ -124,3 +162,19 @@ export const getAllProducts = async (query) => {
     },
   };
 };
+
+
+
+export const getAllProductsBySlug = async (slug) => {
+const product = await Product.findOne({
+    slug,
+    isActive: true
+})
+.populate("category", "name slug")
+.select("-__v");
+  if(!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  return product;
+}
