@@ -2,6 +2,7 @@ import User from '../../models/user.model.js';
 import ApiError from '../../errors/apiError.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import Cart from "../../models/cart.model.js";
 
 
 //HELPER FUNCTION TO GENERATE ACCESS TOKEN
@@ -63,6 +64,9 @@ export const registerUser = async (userData) => {
     });
 
     await newUser.save();
+
+    //create a cart for the new user
+    await Cart.create({user: newUser._id});
 
     const createdUser = await User.findById(newUser._id)
     .select("-password -refreshToken");
