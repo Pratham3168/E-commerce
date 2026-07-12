@@ -3,7 +3,7 @@ import Product from "../../models/product.model.js";
 import Category from "../../models/category.model.js";
 import ApiError from "../../errors/apiError.js";
 import fs from "fs/promises";
-import { uploadToCloudinary} from "../../utils/cloudinary.utils.js";
+import { uploadToCloudinary , deleteFromCloudinary } from "../../utils/cloudinary.utils.js";
 
 export const createProduct = async (productData) => {
   const {
@@ -326,3 +326,31 @@ export const uploadProductImages = async (productId, files) => {
 
   return product;
 };
+
+
+
+export const deleteProductImage = async (productId, imageId) => {
+  const product = await Product.findById(productId);
+
+  if(!product || !product.isActive){
+    throw new ApiError(404, "Product not found or inactive");
+  }
+
+  const image = product.images.find((img) => img._id.toString() === imageId);
+
+  if(!image){
+    throw new ApiError(404, "Image not found");
+  }
+
+  const publicId = image.public_id;
+  await deleteFromCloudinary(publicId);
+
+  
+  product.images = product.images.filter((img) => img._id.toString() !== imageId);
+
+  await product.save();
+
+  await product.populate("category", "name slug");
+
+  return product;
+}

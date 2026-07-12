@@ -100,3 +100,17 @@ export const uploadProductImagesController = asyncHandler(async (req,res) => {
     )
   );
 });
+
+
+export const deleteProductImageController = asyncHandler(async (req,res) => {
+  const { productId, imageId } = req.params;
+  const product = await productService.deleteProductImage(productId, imageId);
+
+  return res.status(200).json(
+    new ApiResponse(
+        200,
+        product,
+        "Product image deleted successfully"
+    )
+);
+})

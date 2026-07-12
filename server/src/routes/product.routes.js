@@ -7,11 +7,12 @@ import  validationMiddleware  from '../middlewares/validation.middleware.js';
 import upload from "../middlewares/upload.middleware.js";
 
 //controllers
-import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController,uploadProductImagesController } from '../controllers/product/product.controller.js';
+import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController,uploadProductImagesController, deleteProductImageController } from '../controllers/product/product.controller.js';
 //validators
 import { createProductValidator } from '../validators/product/createproduct.validator.js';
 import { updateProductValidator } from '../validators/product/updateProduct.validator.js';
 import { mongoIdValidator } from '../validators/common/mongoId.validator.js';
+import {deleteProductImageValidator} from '../validators/product/deleteProductImage.validator.js';
 
 const router = Router();
 
@@ -58,6 +59,16 @@ router.patch(
     validationMiddleware,
     restoreProductController
 );
+
+
+router.delete(
+    "/:productId/images/:imageId",
+    protect,
+    authorize("admin"),
+    deleteProductImageValidator,
+    validationMiddleware,
+    deleteProductImageController
+)
 
 
 
