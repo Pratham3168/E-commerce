@@ -296,6 +296,12 @@ export const uploadProductImages = async (productId, files) => {
   }
 
 
+  const MAX_IMAGES = 5;
+
+  if(product.images.length + files.length > MAX_IMAGES){
+    throw new ApiError(400,`Maximum ${MAX_IMAGES} images allowed per product`);
+  }
+
   const uploadedImages = await Promise.all(
     files.map(async (file, index) => {
       console.log(`Image ${index + 1}: Upload started`);
@@ -315,6 +321,10 @@ export const uploadProductImages = async (productId, files) => {
 
 
   product.images.push(...uploadedImages);
+
+  if(!product.thumbnail.url && uploadedImages.length > 0){
+    product.thumbnail = uploadedImages[0];
+  }
 
   await product.save();
 
@@ -348,9 +358,50 @@ export const deleteProductImage = async (productId, imageId) => {
   
   product.images = product.images.filter((img) => img._id.toString() !== imageId);
 
+  if (product.thumbnail?.public_id === image.public_id) {
+  if (product.images.length > 0) {
+    product.thumbnail = {
+      public_id: product.images[0].public_id,
+      url: product.images[0].url,
+    };
+  } else {
+    product.thumbnail = {
+      public_id: null,
+      url: null,
+    };
+  }
+}
+
   await product.save();
 
   await product.populate("category", "name slug");
 
   return product;
+}
+
+
+
+export const setProductThumbnail = async (productId, imageId) => {
+
+  const product = await Product.findById(productId);
+
+  if(!product || !product.isActive){
+    throw new ApiError(404, "Product not found or inactive");
+  }
+
+  const image = product.images.find((img) => img._id.toString() === imageId);
+
+  if(!image){
+    throw new ApiError(404, "Image not found");
+  }
+
+  product.thumbnail = {
+    public_id: image.public_id,
+    url: image.url,
+  };
+
+  await product.save();
+  await product.populate("category", "name slug");
+  return product;
+
 }

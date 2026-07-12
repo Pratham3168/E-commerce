@@ -7,7 +7,7 @@ import  validationMiddleware  from '../middlewares/validation.middleware.js';
 import upload from "../middlewares/upload.middleware.js";
 
 //controllers
-import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController,uploadProductImagesController, deleteProductImageController } from '../controllers/product/product.controller.js';
+import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController,uploadProductImagesController, deleteProductImageController, setProductThumbnailController } from '../controllers/product/product.controller.js';
 //validators
 import { createProductValidator } from '../validators/product/createproduct.validator.js';
 import { updateProductValidator } from '../validators/product/updateProduct.validator.js';
@@ -70,7 +70,14 @@ router.delete(
     deleteProductImageController
 )
 
-
+router.patch(
+    "/:productId/images/:imageId/thumbnail",
+    protect,
+    authorize("admin"),
+    deleteProductImageValidator,
+    validationMiddleware,
+    setProductThumbnailController
+);
 
 
 export default router;
