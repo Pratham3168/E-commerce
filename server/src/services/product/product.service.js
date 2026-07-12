@@ -2,6 +2,8 @@ import slugify from "slugify";
 import Product from "../../models/product.model.js";
 import Category from "../../models/category.model.js";
 import ApiError from "../../errors/apiError.js";
+import fs from "fs/promises";
+import { uploadToCloudinary} from "../../utils/cloudinary.utils.js";
 
 export const createProduct = async (productData) => {
   const {
@@ -275,6 +277,52 @@ export const restoreProduct = async (productId) => {
   product.isActive = true;
 
   await product.save();
+
+  return product;
+};
+
+
+
+
+export const uploadProductImages = async (productId, files) => {
+  const product = await Product.findById(productId);
+
+  if (!product) {
+    throw new ApiError(404, "Product not found");
+  }
+
+  if (!files || files.length === 0) {
+    throw new ApiError(400, "Please upload at least one image");
+  }
+
+
+  const uploadedImages = await Promise.all(
+    files.map(async (file, index) => {
+      console.log(`Image ${index + 1}: Upload started`);
+      console.log(file.path);
+
+      const image = await uploadToCloudinary(file.path);
+
+      console.log(`Image ${index + 1}: Upload finished`);
+
+      await fs.unlink(file.path);
+
+      console.log(`Image ${index + 1}: File deleted`);
+
+      return image;
+    })
+  );
+
+
+  product.images.push(...uploadedImages);
+
+  await product.save();
+
+  console.log("Product saved");
+
+  await product.populate("category", "name slug");
+
+  console.log("Populate done");
 
   return product;
 };

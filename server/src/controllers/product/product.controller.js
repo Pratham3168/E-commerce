@@ -83,3 +83,20 @@ export const restoreProductController = asyncHandler(async (req, res) => {
     );
 
   });
+
+
+
+export const uploadProductImagesController = asyncHandler(async (req,res) => {
+  const product = await productService.uploadProductImages(
+    req.params.id,
+    req.files
+  );
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      product,
+      "Product images uploaded successfully"
+    )
+  );
+});

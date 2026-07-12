@@ -4,9 +4,10 @@ import {Router} from 'express';
 import protect  from '../middlewares/auth.middleware.js';
 import authorize from '../middlewares/authorize.middleware.js';
 import  validationMiddleware  from '../middlewares/validation.middleware.js';
+import upload from "../middlewares/upload.middleware.js";
 
 //controllers
-import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController } from '../controllers/product/product.controller.js';
+import { createProductController,getAllProductsController,getAllProductsBySlugController,updateProductController, deleteProductController, restoreProductController,uploadProductImagesController } from '../controllers/product/product.controller.js';
 //validators
 import { createProductValidator } from '../validators/product/createproduct.validator.js';
 import { updateProductValidator } from '../validators/product/updateProduct.validator.js';
@@ -24,6 +25,15 @@ router
         validationMiddleware,
         createProductController
     );
+
+
+router.post(
+    "/:id/images",
+    protect,
+    authorize("admin"),
+    upload.array("images", 5),
+    uploadProductImagesController
+);
 
 
 
@@ -48,4 +58,8 @@ router.patch(
     validationMiddleware,
     restoreProductController
 );
+
+
+
+
 export default router;
