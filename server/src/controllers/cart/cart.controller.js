@@ -1,0 +1,21 @@
+import asyncHandler from "../../utils/asyncHandler.js";
+import * as cartService from "../../services/cart/cart.service.js";
+import ApiResponse from "../../utils/apiResponse.js";
+
+export const addToCartController = asyncHandler(async (req,res) => {
+    const {productId,quantity} = req.body;
+
+    const cart = await cartService.addToCart(
+        req.user._id,
+        productId,
+        quantity
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            cart,
+            "Product added to cart successfully"
+        )
+    );
+});

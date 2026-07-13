@@ -5,6 +5,7 @@ import userRouter from './user.routes.js';
 import adminRouter from './admin.routes.js';
 import categoryRouter from './category.routes.js';
 import productRouter from './product.routes.js';
+import cartRouter from './cart.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
@@ -13,5 +14,6 @@ router.use('/users', userRouter);
 router.use('/admin', adminRouter)
 router.use('/categories', categoryRouter);
 router.use('/products', productRouter);
+router.use('/cart',cartRouter);
 
 export default router;
