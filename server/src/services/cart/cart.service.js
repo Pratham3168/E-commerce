@@ -116,4 +116,53 @@ export const updateCartItem = async (userId, productId, quantity) => {
     return cart;
 
 
+};
+
+
+export const removeCartItem = async (userId, productId) => {
+  const cart = await Cart.findOne({user: userId});
+
+  if(!cart){
+    throw new ApiError(404,"Cart not found");
+  }
+
+  const product = await Product.findById(productId);
+  if(!product || !product.isActive){
+    throw new ApiError(404,"Product not found or unavailable");
+  }
+
+  cart.items = cart.items.filter(
+    item => item.product.toString() !== productId
+  );
+
+  recalculateCart(cart);
+
+  await cart.save();
+  await cart.populate({
+    path: "items.product",
+    select: "name slug price stock thumbnail isActive"
+  });
+
+  return cart;
+};
+
+
+export const clearCart = async (userId) => {
+
+  const cart = await Cart.findOne({user: userId});
+
+  if(!cart){
+    throw new ApiError(404,"Cart not found");
+  }
+
+  cart.items = [];
+
+  cart.totalItems = 0;
+  cart.totalPrice = 0;
+
+  await cart.save();
+
+  return cart;
+
+
 }

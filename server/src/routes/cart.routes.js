@@ -3,13 +3,14 @@ import {Router} from 'express';
 //validators
 import { addToCartValidator } from '../validators/cart/addToCart.validator.js';
 import { updateCartValidator } from '../validators/cart/updateCart.validator.js';
+import { removeCartItemValidator } from '../validators/cart/removeCartItem.validator.js';
 //middlewares
 import protect from '../middlewares/auth.middleware.js';
 import authorize from '../middlewares/authorize.middleware.js';
 import validationMiddleware  from '../middlewares/validation.middleware.js';
 
 //middlewares
-import { addToCartController, getCartController, updateCartController } from '../controllers/cart/cart.controller.js';
+import { addToCartController, getCartController, updateCartController, removeCartItemController, clearCartController } from '../controllers/cart/cart.controller.js';
 const router = Router();
 
 
@@ -31,5 +32,9 @@ router.get(
 )
 
 router.patch("/:productId", protect, authorize("user"),updateCartValidator, validationMiddleware, updateCartController)
+
+router.delete("/:productId", protect, authorize("user"), removeCartItemValidator, validationMiddleware, removeCartItemController)
+
+router.delete("/", protect, authorize("user"), validationMiddleware, clearCartController);
 
 export default router;

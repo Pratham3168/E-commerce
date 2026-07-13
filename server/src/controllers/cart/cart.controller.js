@@ -53,4 +53,34 @@ export const updateCartController = asyncHandler(async (req,res) => {
             "Cart updated successfully"
         )
     );
-})
+});
+
+export const removeCartItemController = asyncHandler(async (req,res) => {
+    const {productId} = req.params;
+
+    const cart = await cartService.removeCartItem(
+        req.user._id,
+        productId
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            cart,
+            "Cart item removed successfully"
+        )
+    );
+});
+
+
+export const clearCartController = asyncHandler(async (req,res)=> {
+    const cart = await cartService.clearCart(req.user._id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            cart,
+            "Cart cleared successfully"
+        )
+    );
+});
