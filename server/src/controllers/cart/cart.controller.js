@@ -34,3 +34,23 @@ export const getCartController = asyncHandler(async (req,res) => {
     );
 
 });
+
+
+export const updateCartController = asyncHandler(async (req,res) => {
+    const {productId} = req.params;
+    const {quantity} = req.body;
+
+    const cart = await cartService.updateCartItem(
+        req.user._id,
+        productId,
+        quantity
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            cart,
+            "Cart updated successfully"
+        )
+    );
+})
