@@ -3,6 +3,7 @@ import ApiError from '../../errors/apiError.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import Cart from "../../models/cart.model.js";
+import Wishlist from "../../models/wishlist.model.js";
 
 
 //HELPER FUNCTION TO GENERATE ACCESS TOKEN
@@ -67,6 +68,8 @@ export const registerUser = async (userData) => {
 
     //create a cart for the new user
     await Cart.create({user: newUser._id});
+
+    await Wishlist.create({user: newUser._id});
 
     const createdUser = await User.findById(newUser._id)
     .select("-password -refreshToken");
