@@ -48,3 +48,17 @@ export const removeFromWishlistController = asyncHandler(async (req, res) => {
         )
     );
 });
+
+
+export const clearWishlistController = asyncHandler(async (req, res) => {
+
+    const wishlist = await wishlistService.clearWishlist(req.user._id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            wishlist,
+            "Wishlist cleared successfully"
+        )
+    );
+});

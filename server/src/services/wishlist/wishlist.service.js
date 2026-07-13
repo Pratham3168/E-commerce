@@ -71,4 +71,22 @@ export const removeFromWishlist = async (userId, productId) => {
     await wishlist.save();
     await wishlist.populate("products","name slug price thumbnail stock isActive averageRating");
     return wishlist;
+};
+
+
+export const clearWishlist = async (userId )=> {
+    const wishlist = await Wishlist.findOne({user: userId});
+
+    if(!wishlist){
+        throw new ApiError(404, "Wishlist not found");
+    }
+
+    if(wishlist.products.length === 0){
+        throw new ApiError(400, "Wishlist is already empty");
+    }
+
+    wishlist.products =[];
+
+    await wishlist.save();
+    return wishlist;
 }

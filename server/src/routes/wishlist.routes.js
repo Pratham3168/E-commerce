@@ -9,7 +9,7 @@ import authorize from '../middlewares/authorize.middleware.js';
 import validationMiddleware  from '../middlewares/validation.middleware.js'; 
 
 //controllers
-import { addToWishlistController,getWishlistController, removeFromWishlistController} from '../controllers/wishlist/wishlist.controller.js';
+import { addToWishlistController,clearWishlistController,getWishlistController, removeFromWishlistController} from '../controllers/wishlist/wishlist.controller.js';
 import { removeFromWishlistValidator } from '../validators/wishlist/removeFromWishlist.validator.js';
 
 
@@ -32,6 +32,14 @@ router.delete(
     removeFromWishlistValidator,
     validationMiddleware,
     removeFromWishlistController
+);
+
+router.delete(
+    "/",
+    protect,
+    authorize("user"),
+    validationMiddleware,
+    clearWishlistController
 );
 
 export default router;
