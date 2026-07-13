@@ -8,7 +8,7 @@ import authorize from '../middlewares/authorize.middleware.js';
 import validationMiddleware  from '../middlewares/validation.middleware.js';
 
 //middlewares
-import { addToCartController } from '../controllers/cart/cart.controller.js';
+import { addToCartController, getCartController } from '../controllers/cart/cart.controller.js';
 const router = Router();
 
 
@@ -19,6 +19,14 @@ router.post(
     addToCartValidator,
     validationMiddleware,
     addToCartController
+)
+
+router.get(
+    "/",
+    protect,
+    authorize("user"),
+    validationMiddleware,
+    getCartController
 )
 
 export default router;

@@ -19,3 +19,18 @@ export const addToCartController = asyncHandler(async (req,res) => {
         )
     );
 });
+
+
+export const getCartController = asyncHandler(async (req,res) => {
+
+    const cart = await cartService.getCart(req.user._id);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            cart,
+            "Cart fetched successfully"
+        )
+    );
+
+});
