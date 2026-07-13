@@ -9,7 +9,8 @@ import authorize from '../middlewares/authorize.middleware.js';
 import validationMiddleware  from '../middlewares/validation.middleware.js'; 
 
 //controllers
-import { addToWishlistController} from '../controllers/wishlist/wishlist.controller.js';
+import { addToWishlistController,getWishlistController, removeFromWishlistController} from '../controllers/wishlist/wishlist.controller.js';
+import { removeFromWishlistValidator } from '../validators/wishlist/removeFromWishlist.validator.js';
 
 
 const router = Router();
@@ -21,6 +22,16 @@ router.post(
     addToWishlistValidator,
     validationMiddleware,
     addToWishlistController
+);
+
+router.get("/", protect, authorize("user"), validationMiddleware, getWishlistController);
+
+router.delete(
+    "/:productId",
+    protect,
+    removeFromWishlistValidator,
+    validationMiddleware,
+    removeFromWishlistController
 );
 
 export default router;

@@ -33,6 +33,42 @@ export const addToWishlist = async (userId, productId) => {
     await wishlist.populate("products","name slug price thumbnail stock averageRating");
 
     return wishlist;
+};
 
 
+export const getWishlist = async (userId) => {
+    const wishlist = await Wishlist.findOne({user: userId})
+    if(!wishlist) {
+        throw new ApiError(404, "Wishlist not found");
+    }
+    await wishlist.populate("products","name slug price thumbnail stock isActive averageRating");
+    const originalLength = wishlist.products.length;
+    wishlist.products = wishlist.products.filter(product => product && product.isActive);
+    if(wishlist.products.length !== originalLength) {
+        await wishlist.save();
+    }
+    return wishlist;
+};
+
+
+export const removeFromWishlist = async (userId, productId) => {
+    const wishlist = await Wishlist.findOne({user: userId});
+    if(!wishlist) {
+        throw new ApiError(404, "Wishlist not found");
+    }
+    const exists = wishlist.products.some(
+        id => id.toString() === productId
+    );
+
+    if(!exists) {
+        throw new ApiError(404, "Product not found in wishlist");
+    }
+
+    wishlist.products = wishlist.products.filter(
+        id => id.toString() !== productId
+    );
+
+    await wishlist.save();
+    await wishlist.populate("products","name slug price thumbnail stock isActive averageRating");
+    return wishlist;
 }
