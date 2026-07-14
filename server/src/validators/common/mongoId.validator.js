@@ -1,7 +1,7 @@
 import { param } from "express-validator";
 
-export const mongoIdValidator = [
-    param("id")
+export const mongoIdValidator = (field, message =" Invalid ID") => [
+    param(field)
         .isMongoId()
-        .withMessage("Invalid product ID"),
+        .withMessage(message),
 ];

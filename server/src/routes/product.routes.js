@@ -32,6 +32,7 @@ router.post(
     "/:id/images",
     protect,
     authorize("admin"),
+    mongoIdValidator("id", "Invalid product ID"),
     upload.array("images", 5),
     uploadProductImagesController
 );
@@ -46,7 +47,7 @@ router.delete(
     "/:id",
     protect,
     authorize("admin"),
-    mongoIdValidator,
+    mongoIdValidator("id", "Invalid product ID"),
     validationMiddleware,
     deleteProductController
 );
@@ -55,7 +56,7 @@ router.patch(
     "/:id/restore",
     protect,
     authorize("admin"),
-    mongoIdValidator,
+    mongoIdValidator("id", "Invalid product ID"),
     validationMiddleware,
     restoreProductController
 );

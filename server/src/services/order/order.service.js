@@ -126,4 +126,20 @@ export const getMyOrders = async (userId) => {
     }).sort({createdAt: -1});
 
     return orders;
-}
+};
+
+
+export const getOrderById = async (userId, orderId, role) => {
+  const order = await Order.findById(orderId).populate("user","firstName lastName email");
+
+  if(!order){
+    throw new ApiError(404, "Order not found");
+  }
+  if(role !== "admin" && 
+    order.user.toSTring() !== userId.toString()
+  ){
+    throw new ApiError(403,"You are not authorized to access this order");
+  }
+
+  return order;
+};
