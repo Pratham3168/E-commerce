@@ -20,9 +20,15 @@ const orderItemSchema = new mongoose.Schema(
     },
 
     thumbnail: {
-      type: String,
-      required: true,
+    public_id: {
+        type: String,
+        default: null,
     },
+    url: {
+        type: String,
+        default: null,
+    },
+},
 
     quantity: {
       type: Number,
@@ -100,6 +106,11 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+
+    shippingAddress: {
+    type: shippinAddressSchema,
+    required: true,
+},
 
     items: {
       type: [orderItemSchema],

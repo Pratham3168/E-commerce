@@ -7,6 +7,7 @@ import categoryRouter from './category.routes.js';
 import productRouter from './product.routes.js';
 import cartRouter from './cart.routes.js';
 import wishlistRouter from './wishlist.routes.js';
+import orderRouter from './order.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
@@ -17,5 +18,6 @@ router.use('/categories', categoryRouter);
 router.use('/products', productRouter);
 router.use('/cart',cartRouter);
 router.use('/wishlist',wishlistRouter);
+router.use('/orders', orderRouter);
 
 export default router;
