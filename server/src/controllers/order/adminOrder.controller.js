@@ -13,3 +13,19 @@ export const getAllOrderController = asyncHandler(async (req,res) => {
         )
     );
 });
+
+
+export const updateOrderStatusController = asyncHandler(async (req,res) => {
+    const {orderId} = req.params;
+    const {newStatus} = req.body;
+
+    const updatedOrder = await adminOrderService.updateOrderStatus(orderId, newStatus);
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            updatedOrder,
+            "Order status updated successfully"
+        )
+    );
+});
