@@ -47,3 +47,20 @@ export const getOrderByIdController = asyncHandler(async (req,res) => {
         )
     );
 });
+
+
+export const cancelOrderController = asyncHandler(async (req,res) => {
+    const order = await orderService.cancelOrder(
+        req.user._id,
+        req.params.orderId,
+        req.user.role
+    );
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            order,
+            "Order cancelled successfully"
+        )
+    );
+})

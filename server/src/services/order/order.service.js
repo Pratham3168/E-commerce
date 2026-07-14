@@ -130,16 +130,75 @@ export const getMyOrders = async (userId) => {
 
 
 export const getOrderById = async (userId, orderId, role) => {
-  const order = await Order.findById(orderId).populate("user","firstName lastName email");
+  const order = await Order.findById(orderId);
 
   if(!order){
     throw new ApiError(404, "Order not found");
   }
   if(role !== "admin" && 
-    order.user.toSTring() !== userId.toString()
+    order.user.toString() !== userId.toString()
   ){
     throw new ApiError(403,"You are not authorized to access this order");
   }
 
+  await order.populate("user", "firstName lastName email");
   return order;
 };
+
+export const cancelOrder = async (
+  userId,
+  orderId,
+  role
+) => {
+
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try{
+    
+    const order = await Order.findById(orderId).session(session);
+
+    if(!order){
+      throw new ApiError(404, "Order not found");
+    }
+
+    if(role !== "admin" && 
+      order.user.toString() !== userId.toString()
+    ){
+      throw new ApiError(403,"You are not authorized to cancel this order");
+    }
+
+    if(!["Pending", "Confirmed"].includes(order.status)){
+      throw new ApiError(400, `Order cannot be canceled because it is ${order.status}`);
+    }
+
+    for(const item of order.items){
+      await Product.findByIdAndUpdate(
+        item.product,
+        {
+          $inc:{
+            stock: item.quantity,
+            soldCount: -item.quantity
+          }
+        },
+        {session}
+      );
+    }
+
+    order.status = "Cancelled";
+    await order.save({session});
+    await session.commitTransaction();
+
+    return order;
+
+  }
+  catch(error){
+    await session.abortTransaction();
+    throw error;
+  }
+  finally{
+    session.endSession();
+  }
+
+}

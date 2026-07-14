@@ -2,7 +2,7 @@ import { Router } from 'express';
 const router = Router();
 
 import protect from '../middlewares/auth.middleware.js';
-import { getMyOrdersController, getOrderByIdController, placeOrderController } from '../controllers/order/order.controller.js';
+import { cancelOrderController, getMyOrdersController, getOrderByIdController, placeOrderController } from '../controllers/order/order.controller.js';
 import validationMiddleware from '../middlewares/validation.middleware.js';
 import { placeOrderValidator } from '../validators/order/placeOrder.validator.js';
 import { mongoIdValidator } from '../validators/common/mongoId.validator.js';
@@ -32,6 +32,13 @@ router.get(
 )
 
 
+router.patch(
+    "/:orderId/cancel",
+    protect,
+    mongoIdValidator("orderId", "Invalid order ID"),
+    validationMiddleware,
+    cancelOrderController
+)
 
 
 export default router;
