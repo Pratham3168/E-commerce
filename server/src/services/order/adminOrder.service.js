@@ -1,4 +1,6 @@
 import Order from "../../models/order.model.js";
+import User from "../../models/user.model.js";
+import Product from "../../models/product.model.js";
 import ApiError from "../../errors/apiError.js";
 
 export const getAllOrders = async (query) => {
@@ -67,4 +69,56 @@ export const updateOrderStatus = async (orderId, newStatus) => {
 
     await order.populate("user", "firstName lastName email");
     return order;
+}
+
+
+
+export const getDashboardAnalytics = async () => {
+
+    const [totalOrders, pendingOrders, deliveredOrders, cancelledOrders, totalCustomers, totalProducts, outOfStockProducts] = await Promise.all([
+        Order.countDocuments(),
+
+        Order.countDocuments({status: "Pending"}),
+
+        Order.countDocuments({status: "Delivered"}),
+
+        Order.countDocuments({status: "Cancelled"}),
+
+        User.countDocuments({ role: "user" ,isActive: true}),
+
+        Product.countDocuments({isActive: true}),
+
+        Product.countDocuments({stock : {$lte : 0}, isActive: true}),
+    ])
+
+
+
+    const revenue = await Order.aggregate([
+        {
+            $match: {
+                status: "Delivered",
+            }
+        },
+        {
+            $group: {
+                _id: null,
+                totalRevenue: {$sum: "$totalAmount"},
+            }
+        }
+    ])
+
+
+    const totalRevenue = revenue[0]?.totalRevenue || 0;
+
+
+    return {
+        totalOrders,
+        pendingOrders,
+        deliveredOrders,
+        cancelledOrders,
+        totalCustomers,
+        totalProducts,
+        outOfStockProducts,
+        totalRevenue,
+    };
 }

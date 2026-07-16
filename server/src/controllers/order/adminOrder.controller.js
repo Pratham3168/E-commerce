@@ -29,3 +29,16 @@ export const updateOrderStatusController = asyncHandler(async (req,res) => {
         )
     );
 });
+
+
+export const getDashboardAnalyticsController = asyncHandler(async (req,res) => {
+    const analyticsData = await adminOrderService.getDashboardAnalytics();
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            analyticsData,
+            "Dashboard analytics fetched successfully"
+        )
+    );
+});

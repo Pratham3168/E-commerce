@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { getAllOrderController, updateOrderStatusController } from "../controllers/order/adminOrder.controller.js";
+import { getAllOrderController, getDashboardAnalyticsController, updateOrderStatusController } from "../controllers/order/adminOrder.controller.js";
 
 import protect from "../middlewares/auth.middleware.js";
 import authorize from "../middlewares/authorize.middleware.js";
@@ -25,6 +25,9 @@ router.patch(
     validationMiddleware,
     updateOrderStatusController
 )
+
+
+router.get("/dashboard", protect, authorize("admin"), getDashboardAnalyticsController);
 
 
 export default router;
