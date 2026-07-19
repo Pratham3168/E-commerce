@@ -12,9 +12,13 @@ import { createCouponValidator } from '../validators/coupon/createCoupon.validat
 
 
 //controller
-import { createCouponController } from '../controllers/coupon/adminCoupon.controller.js';
+import { createCouponController, getAllCouponsController, updateCouponController } from '../controllers/coupon/adminCoupon.controller.js';
+import { updateCouponValidator } from '../validators/coupon/updateCoupon.validator.js';
+import { mongoIdValidator } from '../validators/common/mongoId.validator.js';
 
 
 router.post('/', protect, authorize('admin'), createCouponValidator,validationMiddleware, createCouponController);
+router.get('/', protect, authorize('admin'), getAllCouponsController);
+router.patch('/:id', protect, authorize('admin'), mongoIdValidator('id',"Invalid coupon ID"), updateCouponValidator , validationMiddleware, updateCouponController);
 
 export default router;
