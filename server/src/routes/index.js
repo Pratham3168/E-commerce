@@ -9,6 +9,7 @@ import cartRouter from './cart.routes.js';
 import wishlistRouter from './wishlist.routes.js';
 import orderRouter from './order.routes.js';
 import adminOrderRouter from './adminOrder.routes.js';
+import adminCouponRouter from './adminCoupon.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
@@ -21,5 +22,6 @@ router.use('/cart',cartRouter);
 router.use('/wishlist',wishlistRouter);
 router.use('/orders', orderRouter);
 router.use('/admin', adminOrderRouter);
+router.use('/coupons',adminCouponRouter);
 
 export default router;
