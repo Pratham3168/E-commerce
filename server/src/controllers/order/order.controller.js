@@ -7,7 +7,8 @@ export const placeOrderController = asyncHandler(async (req, res) => {
     const orderItems = await orderService.placeOrder(
         req.user._id,
         req.body.shippingAddress,
-        req.body.paymentMethod
+        req.body.paymentMethod,
+        req.body.couponCode
     );
 
     return res.status(200).json(

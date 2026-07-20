@@ -3,11 +3,14 @@ import Cart from "../../models/cart.model.js";
 import Order from "../../models/order.model.js";
 import Product from "../../models/product.model.js";
 import ApiError from "../../errors/apiError.js";
+import Coupon from "../../models/coupon.model.js";
+import { validateAndCalculateCoupon } from "../coupon/coupon.service.js";
 
 export const placeOrder = async (
   userId,
   shippingAddress,
   paymentMethod = "COD",
+  couponCode
 ) => {
   const session = await mongoose.startSession();
 
@@ -59,8 +62,13 @@ export const placeOrder = async (
       subtotal += itemSubtotal;
     }
 
+    const { coupon, discount } = await validateAndCalculateCoupon(
+      couponCode,
+      subtotal,
+      session,
+    );
+
     const shippingFee = subtotal >= 500 ? 0 : 50;
-    const discount = 0;
 
     const tax = 0;
 
@@ -83,6 +91,13 @@ export const placeOrder = async (
           discount,
           tax,
           totalAmount,
+          coupon: coupon
+            ? {
+                code: coupon.code,
+                discountType: coupon.discountType,
+                discountValue: coupon.discountValue,
+              }
+            : undefined,
         },
       ],
       { session },
@@ -96,6 +111,18 @@ export const placeOrder = async (
           $inc: {
             stock: -item.quantity,
             soldCount: item.quantity,
+          },
+        },
+        { session },
+      );
+    }
+
+    if (coupon) {
+      await Coupon.findByIdAndUpdate(
+        coupon._id,
+        {
+          $inc: {
+            usedCount: 1,
           },
         },
         { session },
@@ -119,86 +146,72 @@ export const placeOrder = async (
   }
 };
 
-
 export const getMyOrders = async (userId) => {
-    const orders = await Order.find({
-        user: userId
-    }).sort({createdAt: -1});
+  const orders = await Order.find({
+    user: userId,
+  }).sort({ createdAt: -1 });
 
-    return orders;
+  return orders;
 };
-
 
 export const getOrderById = async (userId, orderId, role) => {
   const order = await Order.findById(orderId);
 
-  if(!order){
+  if (!order) {
     throw new ApiError(404, "Order not found");
   }
-  if(role !== "admin" && 
-    order.user.toString() !== userId.toString()
-  ){
-    throw new ApiError(403,"You are not authorized to access this order");
+  if (role !== "admin" && order.user.toString() !== userId.toString()) {
+    throw new ApiError(403, "You are not authorized to access this order");
   }
 
   await order.populate("user", "firstName lastName email");
   return order;
 };
 
-export const cancelOrder = async (
-  userId,
-  orderId,
-  role
-) => {
-
-
+export const cancelOrder = async (userId, orderId, role) => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
-  try{
-    
+  try {
     const order = await Order.findById(orderId).session(session);
 
-    if(!order){
+    if (!order) {
       throw new ApiError(404, "Order not found");
     }
 
-    if(role !== "admin" && 
-      order.user.toString() !== userId.toString()
-    ){
-      throw new ApiError(403,"You are not authorized to cancel this order");
+    if (role !== "admin" && order.user.toString() !== userId.toString()) {
+      throw new ApiError(403, "You are not authorized to cancel this order");
     }
 
-    if(!["Pending", "Confirmed"].includes(order.status)){
-      throw new ApiError(400, `Order cannot be canceled because it is ${order.status}`);
+    if (!["Pending", "Confirmed"].includes(order.status)) {
+      throw new ApiError(
+        400,
+        `Order cannot be canceled because it is ${order.status}`,
+      );
     }
 
-    for(const item of order.items){
+    for (const item of order.items) {
       await Product.findByIdAndUpdate(
         item.product,
         {
-          $inc:{
+          $inc: {
             stock: item.quantity,
-            soldCount: -item.quantity
-          }
+            soldCount: -item.quantity,
+          },
         },
-        {session}
+        { session },
       );
     }
 
     order.status = "Cancelled";
-    await order.save({session});
+    await order.save({ session });
     await session.commitTransaction();
 
     return order;
-
-  }
-  catch(error){
+  } catch (error) {
     await session.abortTransaction();
     throw error;
-  }
-  finally{
+  } finally {
     session.endSession();
   }
-
-}
+};
