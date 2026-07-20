@@ -31,3 +31,32 @@ export const updateCouponController = asyncHandler(async (req, res) => {
         new ApiResponse(200, updatedCoupon , 'Coupon updated successfully')
     )
 });
+
+
+export const deleteCouponController = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const coupon = await adminCouponService.deleteCoupon(id);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      coupon,
+      "Coupon deleted successfully."
+    )
+  );
+});
+
+export const restoreCouponController = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const coupon = await adminCouponService.restoreCoupon(id);
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      coupon,
+      "Coupon restored successfully."
+    )
+  );
+});

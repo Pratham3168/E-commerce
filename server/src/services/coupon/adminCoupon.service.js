@@ -135,4 +135,41 @@ export const updateCoupon = async (couponId, updateData) => {
 
     return coupon;
 
-}
+};
+
+
+
+export const deleteCoupon = async (couponId) => {
+  const coupon = await Coupon.findById(couponId);
+
+  if (!coupon) {
+    throw new ApiError(404, "Coupon not found.");
+  }
+
+  if (!coupon.isActive) {
+    throw new ApiError(400, "Coupon is already inactive.");
+  }
+
+  coupon.isActive = false;
+  await coupon.save();
+
+  return coupon;
+};
+
+
+export const restoreCoupon = async (couponId) => {
+  const coupon = await Coupon.findById(couponId);
+
+  if (!coupon) {
+    throw new ApiError(404, "Coupon not found.");
+  }
+
+  if (coupon.isActive) {
+    throw new ApiError(400, "Coupon is already active.");
+  }
+
+  coupon.isActive = true;
+  await coupon.save();
+
+  return coupon;
+};
