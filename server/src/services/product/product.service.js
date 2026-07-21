@@ -62,10 +62,14 @@ export const getAllProducts = async (query) => {
     minPrice,
     maxPrice,
     sort,
+    minRating,
+    inStock,
     order,
     featured,
   } = query;
-  const skip = (page - 1) * limit;
+  const pageNumber = Number(page) || 1;
+  const limitNumber = Number(limit) || 10;
+  const skip = (pageNumber - 1) * limitNumber;
   const filter = { isActive: true };
 
   const allowedSortFields = {
@@ -95,6 +99,16 @@ export const getAllProducts = async (query) => {
     filter.category = categoryDoc._id;
   }
 
+  if (minRating) {
+    filter.averageRating = {
+        $gte: Number(minRating),
+    };
+}
+
+if (inStock === "true") {
+    filter.stock = { $gt: 0 };
+}
+
   if (search) {
     filter.$or = [
       {
@@ -103,6 +117,12 @@ export const getAllProducts = async (query) => {
           $options: "i",
         },
       },
+      {
+        description: {
+            $regex: search,
+            $options: "i",
+        },
+    },
       {
         brand: {
           $regex: search,
@@ -141,22 +161,24 @@ export const getAllProducts = async (query) => {
     filter.isFeatured = featured === "true";
   }
 
-  const products = await Product.find(filter)
-    .populate("category", "name slug")
-    .sort(sortOption)
-    .skip(skip)
-    .limit(limit);
+  const [products, totalProducts] = await Promise.all([
+    Product.find(filter)
+        .populate("category", "name slug")
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limitNumber),
 
-  const totalProducts = await Product.countDocuments(filter);
-  const totalPages = Math.ceil(totalProducts / limit);
-  const hasNextPage = page * limit < totalProducts;
-  const hasPrevPage = page > 1;
+    Product.countDocuments(filter),
+]);
+  const totalPages = Math.ceil(totalProducts / limitNumber);
+  const hasNextPage = pageNumber * limitNumber < totalProducts;
+  const hasPrevPage = pageNumber > 1;
 
   return {
     products,
     pagination: {
-      page,
-      limit,
+      page: pageNumber,
+      limit: limitNumber,
       totalProducts,
       totalPages,
       hasNextPage,
