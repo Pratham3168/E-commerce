@@ -5,6 +5,7 @@ import Product from "../../models/product.model.js";
 import ApiError from "../../errors/apiError.js";
 import Coupon from "../../models/coupon.model.js";
 import { validateAndCalculateCoupon } from "../coupon/coupon.service.js";
+import Inventory from "../../models/inventory.mode.js";
 
 export const placeOrder = async (
   userId,
@@ -105,6 +106,12 @@ export const placeOrder = async (
 
     for (const item of cart.items) {
       const product = item.product;
+
+      const previousStock = product.stock;
+      const newStock = previousStock - item.quantity;
+
+      // Update the product's stock and soldCount atomically
+
       await Product.findByIdAndUpdate(
         product._id,
         {
@@ -115,6 +122,23 @@ export const placeOrder = async (
         },
         { session },
       );
+
+      //create inventory history
+      await Inventory.create(
+        [
+          {
+            product: product._id,
+            type: "OUT",
+            quantity: item.quantity,
+            previousStock,
+            newStock,
+            reason: "Order placed by Customer",
+            updatedBy: userId,
+          }
+        ],
+        { session }
+      )
+
     }
 
     if (coupon) {
