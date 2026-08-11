@@ -11,6 +11,7 @@ import orderRouter from './order.routes.js';
 import adminOrderRouter from './adminOrder.routes.js';
 import adminCouponRouter from './adminCoupon.routes.js';
 import reviewRouter from './review.routes.js';
+import addressRouter from './address.routes.js';
 const router = Router();
 
 router.use('/health', healthRouter);
@@ -24,6 +25,7 @@ router.use('/wishlist',wishlistRouter);
 router.use('/orders', orderRouter);
 router.use('/admin', adminOrderRouter);
 router.use('/coupons',adminCouponRouter);
-router.use('/reviews', reviewRouter)
+router.use('/reviews', reviewRouter);
+router.use('/addresses', addressRouter)
 
 export default router;
