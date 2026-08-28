@@ -1,6 +1,6 @@
 import Cart from "../../models/cart.model.js";
 import Product from "../../models/product.model.js";
-import ApiError from "../../errors/ApiError.js";
+import ApiError from "../../errors/apiError.js";
 import recalculateCart from "../../utils/recalculateCart.js";
 
 export const addToCart = async (userId, productId, quantity = 1) => {
