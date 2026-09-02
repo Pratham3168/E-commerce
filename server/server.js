@@ -37,10 +37,12 @@ dotenv.config();
 
 const { default: app } = await import("./src/app.js");
 const { default: connectDB } = await import("./src/config/connectDB.js");
+const { redisClient, connectRedis } = await import("./src/config/connectRedis.js");
 
 const startServer = async () => {
   try {
     await connectDB();
+    await connectRedis();
 
     const PORT = process.env.PORT || 3000;
 
