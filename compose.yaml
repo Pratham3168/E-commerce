@@ -1,0 +1,25 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+
+    container_name: ecommerce_server
+
+    env_file:
+      - ./server/.env
+
+    environment:
+      NODE_ENV: production
+
+    ports:
+      - "2068:2068"
+
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: ecommerce_redis
+    ports:
+      - "6379:6379"
