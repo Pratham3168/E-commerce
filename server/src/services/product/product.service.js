@@ -4,6 +4,14 @@ import Category from "../../models/category.model.js";
 import ApiError from "../../errors/apiError.js";
 import fs from "fs/promises";
 import { uploadToCloudinary , deleteFromCloudinary } from "../../utils/cloudinary.utils.js";
+import {
+  getCache, setCache, deleteCache,deleteCacheByPattern
+} from "../../utils/cache.js";
+
+const invalidateProductCache = async (slug) => {
+  await deleteCache(`product:${slug}`);
+  await deleteCacheByPattern("products:*");
+};
 
 export const createProduct = async (productData) => {
   const {
@@ -53,6 +61,18 @@ export const createProduct = async (productData) => {
 };
 
 export const getAllProducts = async (query) => {
+
+  const cacheKey = `products:${JSON.stringify(query)}`;
+  const cachedData = await getCache(cacheKey);
+
+  if(cachedData){
+    console.log("Cache Hit: ", cacheKey);
+    return JSON.parse(cachedData);
+  }
+
+  console.log("Cache Miss: ", cacheKey);
+
+
   const {
     page,
     limit,
@@ -174,7 +194,7 @@ if (inStock === "true") {
   const hasNextPage = pageNumber * limitNumber < totalProducts;
   const hasPrevPage = pageNumber > 1;
 
-  return {
+  const result ={
     products,
     pagination: {
       page: pageNumber,
@@ -185,9 +205,23 @@ if (inStock === "true") {
       hasPrevPage,
     },
   };
+
+  await setCache(cacheKey, result, 300); // Cache for 5 minutes
+  return result;
 };
 
 export const getAllProductsBySlug = async (slug) => {
+  const cacheKey = `product:${slug}`;
+  const cachedData = await getCache(cacheKey);
+
+  if(cachedData){
+    console.log("Cache Hit: ", cacheKey);
+    return JSON.parse(cachedData);
+  }
+
+  console.log("Cache Miss: ", cacheKey);
+
+
   const product = await Product.findOne({
     slug,
     isActive: true,
@@ -198,7 +232,11 @@ export const getAllProductsBySlug = async (slug) => {
     throw new ApiError(404, "Product not found");
   }
 
-  return product;
+  const result = product;
+
+  await setCache(cacheKey, result,300); // Cache for 5 minutes
+
+  return result;
 };
 
 export const updateProduct = async (productId, updateData) => {
