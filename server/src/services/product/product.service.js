@@ -249,6 +249,8 @@ export const updateProduct = async (productId, updateData) => {
     throw new ApiError(404, "Product not found");
   }
 
+  const oldSlug = product.slug;
+
   if (updateData.name && updateData.name !== product.name) {
     const slug = slugify(updateData.name, { lower: true, strict: true });
 
@@ -303,6 +305,13 @@ export const updateProduct = async (productId, updateData) => {
   }
 
   await product.save();
+
+  await invalidateProductCache(oldSlug);
+
+  if(product.slug !== oldSlug){
+    await invalidateProductCache(product.slug);
+  }
+
   await product.populate("category", "name slug");
   return product;
 };

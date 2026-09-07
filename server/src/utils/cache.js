@@ -17,15 +17,17 @@ const deleteCache = async (key) => {
 const deleteCacheByPattern = async (pattern) => {
   const keys = [];
 
-  for await (const key of redisClient.scanIterator({
+  for await (const batch of redisClient.scanIterator({
     MATCH: pattern,
     COUNT: 100,
   })) {
-    keys.push(key);
+    keys.push(...batch);
   }
 
   if (keys.length > 0) {
-    await redisClient.del(keys);
+    for (const key of keys) {
+        await redisClient.del(key);
+    }
   }
 };
 
