@@ -57,6 +57,8 @@ export const createProduct = async (productData) => {
 
   await product.save();
 
+  await deleteCacheByPattern("products:*");
+
   return product;
 };
 
@@ -322,13 +324,17 @@ export const deleteProduct = async (productId) => {
     throw new ApiError(404, "Product not found");
   }
 
+  
   if (!product.isActive) {
     throw new ApiError(400, "Product is already inactive");
   }
+  const oldSlug = product.slug;
 
   product.isActive = false;
 
   await product.save();
+
+  await invalidateProductCache(oldSlug);
 
   return product;
 };
@@ -343,9 +349,13 @@ export const restoreProduct = async (productId) => {
     throw new ApiError(400, "Product is already active");
   }
 
+  const oldSlug = product.slug;
+
   product.isActive = true;
 
   await product.save();
+
+  await invalidateProductCache(oldSlug);
 
   return product;
 };
@@ -397,6 +407,8 @@ export const uploadProductImages = async (productId, files) => {
 
   await product.save();
 
+  await invalidateProductCache(product.slug);
+
   console.log("Product saved");
 
   await product.populate("category", "name slug");
@@ -443,6 +455,8 @@ export const deleteProductImage = async (productId, imageId) => {
 
   await product.save();
 
+  await invalidateProductCache(product.slug);
+
   await product.populate("category", "name slug");
 
   return product;
@@ -470,6 +484,9 @@ export const setProductThumbnail = async (productId, imageId) => {
   };
 
   await product.save();
+
+  await invalidateProductCache(product.slug);
+
   await product.populate("category", "name slug");
   return product;
 
