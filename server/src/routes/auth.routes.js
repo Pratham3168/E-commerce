@@ -8,14 +8,15 @@ import changePassValidator from '../validators/auth/Changepass.validator.js';
 import deleteAccountValidator from '../validators/auth/deleteAccount.validator.js';
 import validationMiddleware from '../middlewares/validation.middleware.js';
 import protect from '../middlewares/auth.middleware.js';
+import { authLimiter, sensitiveLimiter } from '../middlewares/rateLimit.middleware.js';
 
 const router = Router();
 
-router.post('/register', registerValidator, validationMiddleware, registerUser);
-router.post('/login', loginValidator, validationMiddleware, loginUser);
-router.post("/refresh-token", refreshAccessToken);
-router.post("/logout",protect, logoutUser);
-router.patch("/change-password",protect,changePassValidator,validationMiddleware,changePassword);
-router.delete("/delete-account",protect,deleteAccountValidator,validationMiddleware,deleteAccount);
+router.post('/register', authLimiter, registerValidator, validationMiddleware, registerUser);
+router.post('/login', authLimiter, loginValidator, validationMiddleware, loginUser);
+router.post("/refresh-token", authLimiter, refreshAccessToken);
+router.post("/logout", sensitiveLimiter, protect, logoutUser);
+router.patch("/change-password", sensitiveLimiter, protect, changePassValidator, validationMiddleware, changePassword);
+router.delete("/delete-account", sensitiveLimiter, protect, deleteAccountValidator, validationMiddleware, deleteAccount);
 
 export default router;

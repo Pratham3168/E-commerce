@@ -27,13 +27,14 @@ const storage = multer.diskStorage({
 // };
 
 const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".jfif"];
+const allowedMimeTypes = ["image/jpeg", "image/png", "image/webp", "image/jfif"];
 
 const fileFilter = (req, file, cb) => {
 
     const ext = path.extname(file.originalname).toLowerCase();
 
     if (
-        file.mimetype.startsWith("image/") ||
+        allowedMimeTypes.includes(file.mimetype) &&
         allowedExtensions.includes(ext)
     ) {
         return cb(null, true);

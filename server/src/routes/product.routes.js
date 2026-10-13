@@ -33,6 +33,7 @@ router.post(
     protect,
     authorize("admin"),
     mongoIdValidator("id", "Invalid product ID"),
+    validationMiddleware,
     upload.array("images", 5),
     uploadProductImagesController
 );

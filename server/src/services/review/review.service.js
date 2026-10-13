@@ -76,7 +76,7 @@ export const getProductReviews = async (productId ,query) => {
   const maxRatingNumber = Number(maxRating) || 5;
 
   const existingProduct = await Product.exists({
-    _id: product,
+    _id: productId,
     isActive: true,
   });
   if (!existingProduct) {

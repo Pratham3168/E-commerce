@@ -21,7 +21,7 @@ router.post('/', protect, authorize('admin'), createCouponValidator,validationMi
 router.get('/', protect, authorize('admin'), getAllCouponsController);
 router.patch('/:id', protect, authorize('admin'), mongoIdValidator('id',"Invalid coupon ID"), updateCouponValidator , validationMiddleware, updateCouponController);
 router.delete(
-  "/coupons/:id",
+  "/:id",
   protect,
   authorize("admin"),
   mongoIdValidator("id", "Invalid coupon ID"),
@@ -30,7 +30,7 @@ router.delete(
 );
 
 router.patch(
-  "/coupons/:id/restore",
+  "/:id/restore",
   protect,
   authorize("admin"),
   mongoIdValidator("id", "Invalid coupon ID"),

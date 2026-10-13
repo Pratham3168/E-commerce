@@ -1,132 +1,225 @@
-import * as authService from '../../services/auth/auth.service.js';
-import asyncHandler from '../../utils/asyncHandler.js';
-import ApiResponse from '../../utils/apiResponse.js';
+// import * as authService from '../../services/auth/auth.service.js';
+// import asyncHandler from '../../utils/asyncHandler.js';
+// import ApiResponse from '../../utils/apiResponse.js';
+// import { authCookieOptions } from "../../utils/cookieOptions.js";
 
-export const registerUser = asyncHandler( async (req,res) => {
+// export const registerUser = asyncHandler( async (req,res) => {
+//     const user = await authService.registerUser(req.body);
+
+//     return res.status(201).json(
+//         new ApiResponse(201,user,"User registered successfully")
+//     );
+// });
+
+
+// export const loginUser = asyncHandler( async (req,res) => {
+//     const {user, accessToken, refreshToken} = await authService.loginUser(req.body);
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: "strict",
+//     };
+
+//     return res
+//         .status(200)
+//         .cookie("accessToken" , accessToken, cookieOptions)
+//         .cookie("refreshToken" , refreshToken, cookieOptions)
+//         .json(
+//         new ApiResponse(200,
+//             {
+//                 user,
+//                 accessToken,
+//             },
+//             "User logged in successfully"
+//         )
+//     );
+// });
+
+
+// export const refreshAccessToken = asyncHandler(async (req,res) => {
+//     const incomingRefreshToken = req.cookies.refreshToken;
+
+//     const {accessToken, refreshToken} = await authService.refreshAccessToken(incomingRefreshToken);
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: "strict",
+//     };
+
+//     return res
+//         .status(200)
+//         .cookie("accessToken" , accessToken, cookieOptions)
+//         .cookie("refreshToken" , refreshToken, cookieOptions)
+//         .json(
+//         new ApiResponse(200,
+//             {
+//                 accessToken,
+//             },
+//             "Access token refreshed successfully"
+//         )
+//     );
+// })
+
+
+// export const logoutUser = asyncHandler(async (req,res) => {
+//     await authService.logoutUser(req.user._id);
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: "strict",
+//     };
+
+//     return res
+//         .clearCookie("accessToken",cookieOptions)
+//         .clearCookie("refreshToken",cookieOptions)
+//         .status(200)
+//         .json(
+//             new ApiResponse(
+//                 200,
+//                 null,
+//                 "Logged Out successfully"
+//             )
+//         )
+// });
+
+
+// export const changePassword = asyncHandler(async (req, res) => {
+//     await authService.changePassword(req.user._id,req.body.currentPassword, req.body.newPassword);
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: "strict",
+//     };
+
+
+//     return res
+//         .status(200)
+//         .clearCookie("accessToken",cookieOptions)
+//         .clearCookie("refreshToken",cookieOptions)
+//         .json(
+//             new ApiResponse(
+//                 200,
+//                 null,
+//                 "Password changed successfully. Please login again"
+//             )
+//         )
+// });
+
+// export const deleteAccount = asyncHandler(async (req,res) => {
+//     await authService.deleteAccount(req.user._id, req.body.password);
+
+//     const cookieOptions = {
+//         httpOnly: true,
+//         secure: process.env.NODE_ENV == "production",
+//         sameSite: "strict",
+//     };
+
+//     return res
+//         .status(200)
+//         .clearCookie("accessToken",cookieOptions)
+//         .clearCookie("refreshToken",cookieOptions)
+//         .json(
+//             new ApiResponse(
+//                 200,
+//                 null,
+//                 "Account deleted successfully"
+//             )
+//         )
+// });
+
+
+
+import * as authService from "../../services/auth/auth.service.js";
+import asyncHandler from "../../utils/asyncHandler.js";
+import ApiResponse from "../../utils/apiResponse.js";
+import { authCookieOptions } from "../../utils/cookieOptions.js";
+
+export const registerUser = asyncHandler(async (req, res) => {
     const user = await authService.registerUser(req.body);
 
     return res.status(201).json(
-        new ApiResponse(201,user,"User registered successfully")
+        new ApiResponse(201, user, "User registered successfully")
     );
 });
 
-
-export const loginUser = asyncHandler( async (req,res) => {
-    const {user, accessToken, refreshToken} = await authService.loginUser(req.body);
-
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: "strict",
-    };
+export const loginUser = asyncHandler(async (req, res) => {
+    const { user, accessToken, refreshToken } =
+        await authService.loginUser(req.body);
 
     return res
         .status(200)
-        .cookie("accessToken" , accessToken, cookieOptions)
-        .cookie("refreshToken" , refreshToken, cookieOptions)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", refreshToken, authCookieOptions)
         .json(
-        new ApiResponse(200,
-            {
-                user,
-                accessToken,
-            },
-            "User logged in successfully"
-        )
-    );
+            new ApiResponse(
+                200,
+                { user },
+                "User logged in successfully"
+            )
+        );
 });
 
+export const refreshAccessToken = asyncHandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken;
 
-export const refreshAccessToken = asyncHandler(async (req,res) => {
-    const incomingRefreshToken = req.cookies.refreshToken;
-
-    const {accessToken, refreshToken} = 
+    const { accessToken, refreshToken } =
         await authService.refreshAccessToken(incomingRefreshToken);
 
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: "strict",
-    };
-
     return res
         .status(200)
-        .cookie("accessToken" , accessToken, cookieOptions)
-        .cookie("refreshToken" , refreshToken, cookieOptions)
+        .cookie("accessToken", accessToken, authCookieOptions)
+        .cookie("refreshToken", refreshToken, authCookieOptions)
         .json(
-        new ApiResponse(200,
-            {
-                accessToken,
-            },
-            "Access token refreshed successfully"
-        )
-    );
-})
+            new ApiResponse(
+                200,
+                null,
+                "Access token refreshed successfully"
+            )
+        );
+});
 
-
-export const logoutUser = asyncHandler(async (req,res) => {
+export const logoutUser = asyncHandler(async (req, res) => {
     await authService.logoutUser(req.user._id);
 
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: "strict",
-    };
-
     return res
-        .clearCookie("accessToken",cookieOptions)
-        .clearCookie("refreshToken",cookieOptions)
+        .clearCookie("accessToken", authCookieOptions)
+        .clearCookie("refreshToken", authCookieOptions)
         .status(200)
-        .json(
-            new ApiResponse(
-                200,
-                null,
-                "Logged Out successfully"
-            )
-        )
+        .json(new ApiResponse(200, null, "Logged out successfully"));
 });
-
 
 export const changePassword = asyncHandler(async (req, res) => {
-    await authService.changePassword(req.user._id,req.body.currentPassword, req.body.newPassword);
-
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: "strict",
-    };
-
+    await authService.changePassword(
+        req.user._id,
+        req.body.currentPassword,
+        req.body.newPassword
+    );
 
     return res
+        .clearCookie("accessToken", authCookieOptions)
+        .clearCookie("refreshToken", authCookieOptions)
         .status(200)
-        .clearCookie("accessToken",cookieOptions)
-        .clearCookie("refreshToken",cookieOptions)
         .json(
             new ApiResponse(
                 200,
                 null,
-                "Password changed successfully. Please login again"
+                "Password changed successfully. Please log in again"
             )
-        )
+        );
 });
 
-export const deleteAccount = asyncHandler(async (req,res) => {
+export const deleteAccount = asyncHandler(async (req, res) => {
     await authService.deleteAccount(req.user._id, req.body.password);
 
-    const cookieOptions = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV == "production",
-        sameSite: "strict",
-    };
-
     return res
+        .clearCookie("accessToken", authCookieOptions)
+        .clearCookie("refreshToken", authCookieOptions)
         .status(200)
-        .clearCookie("accessToken",cookieOptions)
-        .clearCookie("refreshToken",cookieOptions)
         .json(
-            new ApiResponse(
-                200,
-                null,
-                "Account deleted successfully"
-            )
-        )
+            new ApiResponse(200, null, "Account deleted successfully")
+        );
 });

@@ -29,6 +29,7 @@ router.get("/", protect, authorize("user"), validationMiddleware, getWishlistCon
 router.delete(
     "/:productId",
     protect,
+    authorize("user"),
     removeFromWishlistValidator,
     validationMiddleware,
     removeFromWishlistController

@@ -27,18 +27,18 @@ export const createProductValidator = [
         .isFloat({ gt: 0 })
         .withMessage("Product price must be a positive number"),
     
-    body("discount")
+    body("discountPercentage")
         .optional()
         .isFloat({ min: 0, max: 100 })
-        .withMessage("Discount must be a number between 0 and 100"),
+        .withMessage("Discount percentage must be a number between 0 and 100"),
     
     body("stock")
         .optional()
         .isInt({ min: 0 })
         .withMessage("Stock must be a non-negative integer"),
 
-    body("featured")
+    body("isFeatured")
         .optional()
         .isBoolean()
-        .withMessage("Featured must be a boolean value"),
+        .withMessage("isFeatured must be a boolean value"),
 ]

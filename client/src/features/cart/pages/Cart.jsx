@@ -1,0 +1,8 @@
+import { Minus, Plus } from 'lucide-react'
+import EmptyState from '../../../components/common/EmptyState'
+import OrderSummary from '../../../components/common/OrderSummary'
+
+export default function Cart({ state }) {
+  const subtotal = state.cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  return <div className="page-shell cart-page"><div className="page-intro compact"><div><span className="eyebrow">Your selection</span><h1>Your bag</h1></div><span className="muted">{state.cart.length} pieces</span></div>{state.cart.length ? <div className="cart-layout"><div className="cart-items"><button className="text-button" onClick={state.clearCart}>Clear bag</button>{state.cart.map(item => <div className="cart-item" key={item.product.id}><img src={item.product.image} alt="" /><div className="cart-item-info"><span className="eyebrow">{item.product.brand}</span><h3>{item.product.name}</h3><span className="muted">${item.product.price}</span><div className="cart-item-actions"><div className="quantity small"><button onClick={() => state.updateQuantity(item.product.id, -1)}><Minus size={13} /></button><span>{item.quantity}</span><button onClick={() => state.updateQuantity(item.product.id, 1)}><Plus size={13} /></button></div><button className="text-button" onClick={() => state.removeItem(item.product.id)}>Remove</button></div></div><strong>${item.product.price * item.quantity}</strong></div>)}</div><OrderSummary subtotal={subtotal} /></div> : <EmptyState title="Your bag is waiting." copy="When something catches your eye, it will appear here." action="Explore the collection" to="/products" />}</div>
+}

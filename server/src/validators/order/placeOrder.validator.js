@@ -47,6 +47,6 @@ export const placeOrderValidator = [
 
   body("paymentMethod")
     .optional()
-    .isIn(["COD", "ONLINE"])
-    .withMessage("Payment method must be either COD or ONLINE"),
+    .equals("COD")
+    .withMessage("Only cash on delivery is currently available"),
 ];

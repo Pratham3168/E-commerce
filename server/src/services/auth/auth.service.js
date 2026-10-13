@@ -1,197 +1,218 @@
-import User from '../../models/user.model.js';
-import ApiError from '../../errors/apiError.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
+import User from "../../models/user.model.js";
+import ApiError from "../../errors/apiError.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import Cart from "../../models/cart.model.js";
 import Wishlist from "../../models/wishlist.model.js";
 
-
 //HELPER FUNCTION TO GENERATE ACCESS TOKEN
 const generateAccessToken = (user) => {
-    return jwt.sign(
-        {
-            _id: user._id,
-        },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
-    );
+  return jwt.sign(
+    {
+      _id: user._id,
+    },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY },
+  );
 };
-
 
 //helper function to generate refresh token
 const generateRefreshToken = (user) => {
-    return jwt.sign(
-        {
-            _id: user._id,
-        },
-        process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
-    );
-}
+  return jwt.sign(
+    {
+      _id: user._id,
+    },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY },
+  );
+};
 
 const generateTokens = async (user) => {
-    const accessToken = generateAccessToken(user);
-    const refreshToken = generateRefreshToken(user);
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
 
-    user.refreshToken = await bcrypt.hash(refreshToken,10);
+  user.refreshToken = await bcrypt.hash(refreshToken, 10);
 
-    await user.save({
-        validateBeforeSave: false,
-    });
+  await user.save({
+    validateBeforeSave: false,
+  });
 
-    return {
-        accessToken,
-        refreshToken,
-    };
+  return {
+    accessToken,
+    refreshToken,
+  };
 };
 
 //IMPLEMENTATION OF REGISTER USER FUNCTION
 export const registerUser = async (userData) => {
-    const { firstName, lastName, email, password,phone } = userData;  
+  const { firstName, lastName, email, password, phone } = userData;
 
-    //check if user already exists
-    const existingUser = await User.findOne({
-        $or : [{ email }, { phone }] });
-    if(existingUser){
-        throw new ApiError(409, "Email or phone already registered");;
-    }
+  //check if user already exists
+  const existingUser = await User.findOne({
+    $or: [{ email }, { phone }],
+  });
+  if (existingUser) {
+    throw new ApiError(409, "Email or phone already registered");
+  }
 
-    const newUser = new User({
-        firstName,
-        lastName,
-        email,
-        password,
-        phone
-    });
+  const newUser = new User({
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+  });
 
-    await newUser.save();
+  await newUser.save();
 
-    //create a cart for the new user
-    await Cart.create({user: newUser._id});
+  //create a cart for the new user
+  await Cart.create({ user: newUser._id });
 
-    await Wishlist.create({user: newUser._id});
+  await Wishlist.create({ user: newUser._id });
 
-    const createdUser = await User.findById(newUser._id)
-    .select("-password -refreshToken");
-    return createdUser;
+  const createdUser = await User.findById(newUser._id).select(
+    "-password -refreshToken",
+  );
+  return createdUser;
 };
-
 
 export const loginUser = async (userData) => {
-    const {login,password} = userData;
+  const { login, password } = userData;
 
-    const query = login.includes("@")
-        ? { email: login }
-        : { phone: login };
+  const query = login.includes("@") ? { email: login } : { phone: login };
 
-    const user = await User.findOne(query);
+  const user = await User.findOne(query);
 
-    if(!user){
-        throw new ApiError(401, "Invalid credentials");
-    }
+  if (!user) {
+    throw new ApiError(401, "Invalid credentials");
+  }
 
-    const isPasswordValid = await user.comparePassword(password);
+  const isPasswordValid = await user.comparePassword(password);
 
-    if(!isPasswordValid){
-        throw new ApiError(401, "Invalid credentials");
-    }
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid credentials");
+  }
 
-    const { accessToken, refreshToken } =
-    await generateTokens(user);
+  const { accessToken, refreshToken } = await generateTokens(user);
 
-    const safeUser = await User.findById(user._id).select("-password -refreshToken");
+  const safeUser = await User.findById(user._id).select(
+    "-password -refreshToken",
+  );
 
-    return { user: safeUser, accessToken, refreshToken };    
-}
-
-
-export const refreshAccessToken = async (incomingRefreshToken) => {
-
-    if(!incomingRefreshToken){
-        throw new ApiError(401, "Refresh Token is required");
-    }
-
-    //verify the refresh token
-    let decoded;
-
-    try {
-        decoded = jwt.verify(
-            incomingRefreshToken,
-            process.env.REFRESH_TOKEN_SECRET
-        );
-    } catch {
-        throw new ApiError(401, "Invalid or expired refresh token");
-    }
-    
-    const user = await User.findById(decoded._id);
-
-    if(!user || !user.isActive){
-        throw new ApiError(401, "Invalid Refresh Token");
-    }
-
-    //compare stored refresh token
-    const isRefreshTokenValid = await bcrypt.compare(incomingRefreshToken, user.refreshToken);
-
-    if(!isRefreshTokenValid){
-        throw new ApiError(401, "Invalid Refresh Token");
-    }
-
-    //generate new tokens
-    const {accessToken, refreshToken} = await generateTokens(user);
-
-    return { accessToken, refreshToken };
-
+  return { user: safeUser, accessToken, refreshToken };
 };
 
+export const refreshAccessToken = async (incomingRefreshToken) => {
+  if (!incomingRefreshToken) {
+    throw new ApiError(401, "Refresh Token is required");
+  }
 
+  //verify the refresh token
+  let decoded;
+
+  try {
+    decoded = jwt.verify(
+      incomingRefreshToken,
+      process.env.REFRESH_TOKEN_SECRET,
+    );
+  } catch {
+    throw new ApiError(401, "Invalid or expired refresh token");
+  }
+
+  const user = await User.findById(decoded._id);
+
+  if (!user || !user.isActive) {
+    throw new ApiError(401, "Invalid Refresh Token");
+  }
+
+  //compare stored refresh token
+  // const isRefreshTokenValid = await bcrypt.compare(incomingRefreshToken, user.refreshToken);
+  if (!user.refreshToken) {
+    throw new ApiError(401, "Invalid Refresh Token");
+  }
+
+  const isRefreshTokenValid = await bcrypt.compare(
+    incomingRefreshToken,
+    user.refreshToken,
+  );
+
+  if (!isRefreshTokenValid) {
+    throw new ApiError(401, "Invalid Refresh Token");
+  }
+
+  //generate new tokens
+  const { accessToken, refreshToken } = await generateTokens(user);
+
+  return { accessToken, refreshToken };
+};
 
 export const logoutUser = async (userId) => {
-    await User.findByIdAndUpdate(
-        userId,
-        {
-            $unset: {
-                refreshToken: 1,
-            },
-        }
-    );
+  await User.findByIdAndUpdate(userId, {
+    $unset: {
+      refreshToken: 1,
+    },
+  });
 };
 
 export const changePassword = async (userId, currentPassword, newPassword) => {
-    const user = await User.findById(userId);
+  const user = await User.findById(userId);
 
-    if(!user){
-        throw new ApiError(404, "User not found");
-    }
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
 
-    const isCurrentPasswordValid = await user.comparePassword(currentPassword);
+  const isCurrentPasswordValid = await user.comparePassword(currentPassword);
 
-    if(!isCurrentPasswordValid){
-        throw new ApiError(401, "Current password is incorrect");
-    }
-    
-    if(currentPassword === newPassword){
-        throw new ApiError(400, "New password cannot be the same as the old password");
-    }
+  if (!isCurrentPasswordValid) {
+    throw new ApiError(401, "Current password is incorrect");
+  }
 
-    user.password = newPassword;
+  if (currentPassword === newPassword) {
+    throw new ApiError(
+      400,
+      "New password cannot be the same as the old password",
+    );
+  }
 
-    user.refreshToken = "";
+  user.password = newPassword;
 
-    await user.save();
+  user.refreshToken = undefined; // Invalidate the refresh token on password change
+
+  await user.save();
 };
 
-export const deleteAccount = async(userId, password) => {
-    const user = await User.findById(userId);
+// export const deleteAccount = async (userId, password) => {
+//   const user = await User.findById(userId);
 
-    if(!user){
-        throw new ApiError(404, "User not found");
-    }
+//   if (!user) {
+//     throw new ApiError(404, "User not found");
+//   }
 
-    const isPasswordValid = await user.comparePassword(password);
+//   const isPasswordValid = await user.comparePassword(password);
 
-    if(!isPasswordValid){
-        throw new ApiError(401, "Password is incorrect");
-    }
+//   if (!isPasswordValid) {
+//     throw new ApiError(401, "Password is incorrect");
+//   }
 
-    await User.findByIdAndDelete(userId);
-}
+//   await User.findByIdAndDelete(userId);
+// };
+
+export const deleteAccount = async (userId, password) => {
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordValid = await user.comparePassword(password);
+
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Password is incorrect");
+  }
+
+  await Promise.all([
+    Cart.deleteOne({ user: userId }),
+    Wishlist.deleteOne({ user: userId }),
+    User.findByIdAndDelete(userId),
+  ]);
+};

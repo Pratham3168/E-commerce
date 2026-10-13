@@ -27,7 +27,7 @@ export const getMyAddresses = async (userId) => {
 
 
 export const getAddressById = async (userId, addressId) => {
-    const address = await Address.findById({_id: addressId, user: userId});
+    const address = await Address.findOne({_id: addressId, user: userId});
     if (!address) {
         throw new ApiError(404, "Address not found");
     }  

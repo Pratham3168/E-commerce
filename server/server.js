@@ -31,26 +31,34 @@
 // startServer();
 
 
+
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const { default: app } = await import("./src/app.js");
-const { default: connectDB } = await import("./src/config/connectDB.js");
-const { redisClient, connectRedis } = await import("./src/config/connectRedis.js");
+const { default: connectDB } = await import(
+  "./src/config/connectDB.js"
+);
+
+const { connectRedis } = await import(
+  "./src/config/connectRedis.js"
+);
 
 const startServer = async () => {
   try {
     await connectDB();
     await connectRedis();
 
+    // Import only after Redis is connected.
+    const { default: app } = await import("./src/app.js");
+
     const PORT = process.env.PORT || 3000;
 
-    app.listen(PORT,"0.0.0.0", () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`Server is running on port ${PORT}`);
     });
   } catch (error) {
-    console.error(error);
+    console.error("Server startup failed:", error);
     process.exit(1);
   }
 };
